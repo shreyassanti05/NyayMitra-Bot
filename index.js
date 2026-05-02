@@ -21,7 +21,10 @@ const PORT                 = process.env.PORT || 3000;
 
 // ── Gemini Setup ──────────────────────────────────────────────
 const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
-const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+const model = genAI.getGenerativeModel({
+  model: 'gemini-1.5-flash',
+  systemInstruction: SYSTEM_PROMPT  // ← moved here, correct format
+});
 
 // ── FREE TRIAL LIMIT ──────────────────────────────────────────
 const FREE_CONVERSATIONS = 3;
@@ -212,7 +215,6 @@ async function getAIReply(user, userMessage) {
 
     const chat = model.startChat({
       history: chatHistory,
-      systemInstruction: SYSTEM_PROMPT,
       generationConfig: { maxOutputTokens: 500, temperature: 0.75 }
     });
 
