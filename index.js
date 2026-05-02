@@ -19,13 +19,6 @@ const RAZORPAY_KEY_ID      = process.env.RAZORPAY_KEY_ID;
 const RAZORPAY_KEY_SECRET  = process.env.RAZORPAY_KEY_SECRET;
 const PORT                 = process.env.PORT || 3000;
 
-// ── Gemini Setup ──────────────────────────────────────────────
-const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
-const model = genAI.getGenerativeModel({
-  model: 'gemini-1.5-flash',
-  systemInstruction: SYSTEM_PROMPT  // ← moved here, correct format
-});
-
 // ── FREE TRIAL LIMIT ──────────────────────────────────────────
 const FREE_CONVERSATIONS = 3;
 const MONTHLY_PRICE_INR  = 49; // ₹49/month
@@ -119,6 +112,11 @@ RULES:
 - Reply in SAME language user writes in
 `;
 
+// ── Gemini Model (initialized after SYSTEM_PROMPT) ───────────
+const model = genAI.getGenerativeModel({
+  model: 'gemini-1.5-flash',
+  systemInstruction: SYSTEM_PROMPT
+});
 // ══════════════════════════════════════════════════════════════
 // 📲 SEND WHATSAPP MESSAGE
 // ══════════════════════════════════════════════════════════════
