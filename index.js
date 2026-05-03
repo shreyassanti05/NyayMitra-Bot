@@ -1,5 +1,5 @@
 // ============================================================
-// NyayMitra v2.1 — Fixed & Complete
+// NyayMitra v2.1 — English Version
 // Meta WhatsApp Cloud API + Gemini AI + Razorpay
 // ============================================================
 
@@ -20,7 +20,7 @@ const RAZORPAY_KEY_SECRET = process.env.RAZORPAY_KEY_SECRET;
 const PORT                = process.env.PORT || 3000;
 
 // ── FREE TRIAL CONFIG ─────────────────────────────────────────
-const FREE_CONVERSATIONS = 3;
+const FREE_CONVERSATIONS = 6;
 const MONTHLY_PRICE_INR  = 49;
 
 // ── IN-MEMORY DATABASE ────────────────────────────────────────
@@ -50,18 +50,23 @@ function canUserChat(user) {
 // ── SYSTEM PROMPT ─────────────────────────────────────────────
 const SYSTEM_PROMPT = `You are NyayMitra, India's trusted free legal advisor on WhatsApp.
 
-PERSONALITY: Speak simple Hinglish. Warm and helpful like a trusted friend who is a lawyer. Never use legal jargon. Give practical advice.
+PERSONALITY: Speak in clear, simple English. Be warm and helpful like a trusted friend who is a lawyer. Never use complex legal jargon. Give practical, actionable advice.
 
 EXPERTISE: Property disputes, Job/Salary issues, Consumer rights, Family/Divorce, Police/FIR, Farmer rights, Banking/Loans, Government schemes.
 
 RESPONSE FORMAT:
-1. One line empathy
-2. Their RIGHTS in 2-3 simple bullet points  
-3. ACTION STEPS - 3-4 things they can do TODAY
-4. WHERE TO GO - authority or helpline
-5. End: "Koi aur sawaal ho toh batayein! 🙏"
+1. One line of empathy — acknowledge their problem kindly
+2. Their RIGHTS — 2-3 simple bullet points
+3. ACTION STEPS — 3-4 things they can do TODAY
+4. WHERE TO GO — which authority, court, or helpline to contact
+5. End with: "Feel free to ask if you have more questions! 🙏"
 
-RULES: Keep SHORT for WhatsApp. Use emojis. Add disclaimer: "Note: Yeh legal jaankari hai, legal advice nahi." Emergency: give Police 100, Women Helpline 1091, Legal Aid 15100. Reply in same language as user.`;
+RULES:
+- Keep responses SHORT and easy to read on mobile
+- Use emojis to make it friendly and scannable
+- Always add: "Note: This is legal information, not legal advice. For complex matters, please consult a qualified lawyer."
+- EMERGENCY (violence/danger): immediately provide Police 100, Women Helpline 1091, Legal Aid 15100
+- Always reply in English`;
 
 // ── GEMINI AI SETUP ───────────────────────────────────────────
 const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
@@ -89,11 +94,18 @@ async function sendPaymentMessage(to, userName, link) {
   await sendMessage(to,
 `⚖️ *NyayMitra — Subscribe Now*
 
-Namaste ${userName || 'ji'}! 🙏 Aapki 3 FREE conversations khatam ho gayi hain.
+Hello ${userName || 'there'}! 🙏 Your *3 FREE conversations* have been used.
 
-✅ *Sirf Rs.49/month* mein unlimited legal help!
+✅ Get *unlimited legal help for just Rs.49/month!*
 
-${link ? '👇 Abhi subscribe karein:\n' + link : 'Reply SUBSCRIBE for payment link'}
+📌 *What you get:*
+• Unlimited legal conversations
+• English support
+• 10+ legal categories covered
+• Available 24/7
+• Connect with a verified lawyer (Rs.99/case)
+
+${link ? '👇 Subscribe now:\n' + link : 'Reply SUBSCRIBE for the payment link'}
 
 _Cancel anytime. No hidden charges._`
   );
@@ -136,7 +148,7 @@ async function getAIReply(user, userMessage) {
     return reply;
   } catch (err) {
     console.error('❌ Gemini error:', err.message);
-    return 'Maafi chahta hoon, thodi technical samasya aayi. Thodi der mein dobara try karein. 🙏';
+    return 'Sorry, we are facing a technical issue right now. Please try again in a moment. 🙏';
   }
 }
 
@@ -167,19 +179,21 @@ app.post('/webhook', async (req, res) => {
 
     // First message — welcome
     if (user.totalMessages === 1) {
-      const m = userText.match(/Main \*(.*?)\* hoon/);
+      const m = userText.match(/My name is \*(.*?)\*/);
       if (m) user.name = m[1];
       await sendMessage(phone,
-`Namaste${user.name ? ' *' + user.name + '*' : ''}! 🙏 Main NyayMitra hoon - aapka muft legal dost! ⚖️
+`Hello${user.name ? ' *' + user.name + '*' : ''}! 🙏 I am NyayMitra — your free legal assistant! ⚖️
 
-🎁 *Aapke paas 3 FREE conversations hain!*
+🎁 *You have 3 FREE conversations!*
 
-Apni legal problem batayein:
-🏠 Property  💼 Job/Salary  🛒 Consumer
-👨‍👩‍👧 Family   🚔 Police/FIR  🌾 Kisan
-🏦 Bank/Loan  📋 Sarkari Yojana
+Tell me your legal problem and I will help you right away.
 
-*Seedha apni problem likhein!* 💪`
+I can help with:
+🏠 Property   💼 Job/Salary   🛒 Consumer Rights
+👨‍👩‍👧 Family    🚔 Police/FIR   🌾 Farmer Rights
+🏦 Bank/Loan  📋 Government Schemes
+
+*Just type your problem and I will guide you!* 💪`
       );
       return;
     }
@@ -210,11 +224,11 @@ Apni legal problem batayein:
       if (left === 0) {
         setTimeout(async () => {
           const link = await createRazorpayOrder(phone, user.name);
-          await sendMessage(phone, `⚠️ *Yeh aapki aakhri FREE conversation thi!*\n\nUnlimited help ke liye sirf *Rs.49/month*!\n\n${link || 'Reply SUBSCRIBE'}`);
+          await sendMessage(phone, `⚠️ *That was your last FREE conversation!*\n\nGet unlimited legal help for just *Rs.49/month* — the price of a cup of tea! ☕\n\n${link ? '👇 Subscribe now:\n' + link : 'Reply SUBSCRIBE for the payment link'}`);
         }, 2000);
       } else if (left === 1) {
         setTimeout(async () => {
-          await sendMessage(phone, `_💡 Sirf *1 FREE conversation* bachi hai. Unlimited ke liye Rs.49/month - reply SUBSCRIBE._`);
+          await sendMessage(phone, `_💡 You have only *1 FREE conversation* left. Get unlimited access for Rs.49/month — reply SUBSCRIBE._`);
         }, 1500);
       }
     }
@@ -235,8 +249,8 @@ app.get('/admin', (req, res) => {
   });
 });
 
-app.get('/', (req, res) => res.json({ status: '✅ NyayMitra Bot LIVE!', version: '2.1' }));
+app.get('/', (req, res) => res.json({ status: '✅ NyayMitra Bot LIVE!', version: '2.1-EN' }));
 
 app.listen(PORT, () => {
-  console.log('\n⚖️  NyayMitra v2.1 Running on port', PORT, '\n');
+  console.log('\n⚖️  NyayMitra v2.1 (English) Running on port', PORT, '\n');
 });
